@@ -1,5 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
+Future<String?> getApiKeyOpenweathermap() async {
+  //defaults to file name load(fileName: ".env")
+  //dotenv.get('MISSING', fallback: 'Default fallback value')
+  await dotenv.load();
+  return dotenv.env['ApiKeyOpenweathermap'];
+}
+  
 const kTempTextStyle = TextStyle(
   fontFamily: 'Spartan MB',
   fontSize: 100.0,

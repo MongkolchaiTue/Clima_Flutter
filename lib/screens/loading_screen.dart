@@ -1,8 +1,8 @@
 
 import 'package:flutter/material.dart';
 import '../services/location.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import '../services/networking.dart';
+import '../utilities/constants.dart';
 
 class LoadingScreen extends StatefulWidget {
   @override
@@ -15,33 +15,33 @@ class _LoadingScreenState extends State<LoadingScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
-
-    getLocation();
   }
 
-  Future<http.Response> getData(Location location) async {
-    http.Response response = await http.get(Uri.parse('https://samples.openweathermap.org/data/2.5/weather?lat=35&lon=139&appid=b1b15e88fa797225412429c1c50c122a1'));
-    return response;
-  }
 
-  void getLocation() async {
+  void getLocationData() async {
     Location location = Location();
     await location.getCurrentLocation();
+    String? apiKey = await getApiKeyOpenweathermap();
+    NetworkHelper networkHelper = NetworkHelper('https://api.openweathermap.org/data/2.5/weather?lat=${location.latitude}&lon=${location.longitude}&appid=$apiKey');
+    var weatherData = await networkHelper.getData();
 
-    print(location.latitude);
-    print(location.longitude);
+      // var longitude = data['coord']['lon'];
+      // var weatherDescription = data['weather'][0]['description'];
+      double temperature = weatherData['main']['temp'];
+      int condition = weatherData['weather'][0]['id'];
+      String cityName = weatherData['name'];
 
-    http.Response response = await getData(location);
-    if(response.statusCode == 200) {
-      var data = jsonDecode(response.body) as Map<String, dynamic>;
-      var longitude = data['coord']['lon'];
-      var weatherDescription = data['weather'][0]['description'];
 
-      print('weather description $weatherDescription , longitude $longitude');
+      print('temperature $temperature , condition $condition, cityName $cityName');
 
-    } else {
-      print(response.statusCode);
-    }
+      // temperature 285.514 , condition 800, cityName Tawarano
+      //เทศบาลเมืองพระประแดง https://www.google.co.th/maps/place/
+      // @13.6599936,100.5323128,14z/
+      // Performing hot restart...141ms
+      // Restarted application in 142ms.
+      // 13.5771512
+      // 100.5020792
+      // temperature 305.78 , condition 804, cityName Thung Khru
   }
 
   @override
@@ -51,7 +51,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
         child: TextButton(
           onPressed: () {
             //Get the current location
-            getLocation();
+            getLocationData();
           },
           child: Text('Get Location'),
         ),
